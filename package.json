@@ -1,0 +1,23 @@
+{
+  "author": "Peter Browse <peterbrowse@gmail.com>",
+  "name": "g-proto",
+  "description": "Prototype for the little green bottle",
+  "version": "0.0.1-7",
+  "config": {
+    "port": "8080"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "3.x",
+    "socket.io": "0.9.x",
+    "socket.io-client": "0.9.x",
+    "twilio": "1.1.x"
+  },
+  "engines": {
+    "node": "0.8.x",
+    "npm": "1.1.x"
+  },
+  "subdomain": "g-proto"
+}
