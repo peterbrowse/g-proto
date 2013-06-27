@@ -5,8 +5,9 @@ var	blue  	= '\033[34m',
 	yellow 	= '\033[33m',
 	reset 	= '\033[0m';
 
+var call_id = '';
 
-console.log(blue+'Twilio App Starting');
+console.log(blue+'Twilio App Starting'+reset);
 
 var express = require('express')
 ,	http 	= require('http')
@@ -43,26 +44,34 @@ server.listen(process.env.PORT || 8080, function (err) {
   console.log(green+'info: '+reset+'App running in '+yellow+process.env.NODE_ENV+reset+' mode.');
 });
 
-app.get('/twiml', function(req, res) {
+app.post('/connect', function(req, res) {
 	var resp = new twilio.TwimlResponse();
-		resp.say('On a scale of 1 to 9, how do you feel?', {
+		resp.say("On a scale of 1 to 9, how do you feel?", {
     		voice:'woman',
     		language:'en-gb',
     		loop: 1
 		}).record({
-			timeout:4,
+    		action: 'http://g-proto.jit.su/post-record',
+			timeout:1,
 			transcribe: true,
 			playBeep: false,
-			maxLength: 4,
 			transcribeCallback: "/transcribed"
-		}).say('Hmm interesting, goodbye', {
+		});
+		
+        res.type('text/xml');
+        res.send(resp.toString());
+});
+
+app.post('/post-record', function(req, res) {
+	var resp = new twilio.TwimlResponse();
+		resp.say('Hmm interesting, goodbye', {
 			voice:'woman',
     		language:'en-gb',
     		loop: 1
 		}).hangup();
 		
-        res.type('text/xml');
-        res.send(resp.toString());
+		res.type('text/xml');
+		res.send(resp.toString());
 });
 
 io.sockets.on('connection', function (socket) {
@@ -70,20 +79,29 @@ io.sockets.on('connection', function (socket) {
 		phone.makeCall({
 			to: number,
     		from: '+441204238481', // A number you bought from Twilio and can use for outbound communication
-    		url: 'http://www.onepixelwide.co.uk/twilio.php' // A URL that produces an XML document (TwiML) which contains instructions for the call
+    		url: 'http://g-proto.jit.su/connect' // A URL that produces an XML document (TwiML) which contains instructions for the call
 
 		}, function(err, responseData) {
 			if(!err) {
-				//console.log(responseData);
+				call_id = responseData.sid;
 			} else {
 				console.log(err);
 			}
 		});
 	});
 	
+	socket.on('get_transcripts', function() {
+		phone.transcriptions.list(function(err, data) {
+			data.transcriptions.forEach(function(transcription) {
+       			socket.emit('all_transcripts', transcription);
+    		});
+		});
+	});
+	
 	app.post('/transcribed', function(req, res) {
 		phone.transcriptions.list(function(err, data) {
-    		console.log(data);
+			io.sockets.emit("recorded", data.transcriptions[0].transcription_text);
+    		res.send({});
 		});
 	});
 });

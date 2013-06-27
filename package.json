@@ -2,7 +2,7 @@
   "author": "Peter Browse <peterbrowse@gmail.com>",
   "name": "g-proto",
   "description": "Prototype for the little green bottle",
-  "version": "0.0.1-7",
+  "version": "0.0.1-70",
   "config": {
     "port": "8080"
   },
