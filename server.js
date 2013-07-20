@@ -14,7 +14,7 @@ var express = require('express')
 ,	app 	= express()
 ,	server 	= http.createServer(app)
 ,	io = require('socket.io').listen(server)
-,	phone = require('twilio')('AC899603d891dcc0517d0c9d4e65650007', '8e92349b54e47026f1dcde55b4ea251c')
+,	phone = require('twilio')('', '')
 ,	twilio = require('twilio');
 
 io.configure(function(){
